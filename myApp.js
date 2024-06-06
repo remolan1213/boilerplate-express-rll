@@ -2,6 +2,9 @@ let express = require("express");
 let app = express(); // Removed const keyword for consistency
 const path = require("path");
 require("dotenv").config();
+const bodyParser = require("body-parser");
+
+app.use(bodyParser.urlencoded({ extended: false }));
 
 // Corrected middleware for logging
 app.use((req, res, next) => {
@@ -30,6 +33,29 @@ app.get("/json", (req, res) => {
   res.json(message);
 });
 //middleware chaining
-app.get("/now");
+app.get(
+  "/now",
+  (req, res, next) => {
+    req.time = new Date().toString();
+    next();
+  },
+  (req, res) => {
+    // Corrected line
+    res.json({ time: req.time });
+  }
+);
+
+app.get("/:word/echo", (req, res) => {
+  res.json({ echo: req.params.word });
+});
+
+app.get("/name", (req, res) => {
+  res.json({ name: req.query.first + " " + req.query.last });
+});
+
+app.post("/name", (req, res) => {
+  const { first, last } = req.body;
+  res.json({ name: first + " " + last });
+});
 
 module.exports = app;
